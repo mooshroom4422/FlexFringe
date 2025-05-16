@@ -24,3 +24,6 @@ tests/tests
 source/gitversion.cpp
 source/evaluators.h
 CMakeFiles/
+
+# results
+data/*/*.ff*
