@@ -14,8 +14,14 @@ int n, m;
 std::string out_file;
 std::vector<trace> traces;
 
+std::string conv(int id) {
+	if(id < 10)
+		return "0" + std::to_string(id);
+	return std::to_string(id);
+}
+
 void cut_ps(bool reverse, int cut_pref, int cut_suf, int id) {
-	std::string out_name = out_file+"/model_"+std::to_string(id)+".dat";
+	std::string out_name = out_file+"/model_"+conv(id)+".dat";
 	std::ofstream file(out_name);
 	std::cerr << "[debug] outps\n";
 	std::cerr << "[debug] output file: " << out_name << std::endl;
@@ -25,7 +31,7 @@ void cut_ps(bool reverse, int cut_pref, int cut_suf, int id) {
 	}
 
 	file << n << ' ' << m << std::endl;
-	for(auto &tr : traces) {
+	for(trace tr : traces) {
 		if(reverse)
 			std::reverse(tr.labels.begin(), tr.labels.end());
 
@@ -37,7 +43,7 @@ void cut_ps(bool reverse, int cut_pref, int cut_suf, int id) {
 }
 
 void reverse_after(bool reverse, int k, int id) {
-	std::string out_name = out_file+"/model_"+std::to_string(id)+".dat";
+	std::string out_name = out_file+"/model_"+conv(id)+".dat";
 	std::ofstream file(out_name);
 	std::cerr << "[debug] outps\n";
 	std::cerr << "[debug] output file: " << out_name << std::endl;
@@ -48,7 +54,7 @@ void reverse_after(bool reverse, int k, int id) {
 
 	file << n << ' ' << m << std::endl;
 
-	for(auto &tr : traces) {
+	for(auto tr : traces) {
 		if(reverse)
 			std::reverse(tr.labels.begin(), tr.labels.end());
 

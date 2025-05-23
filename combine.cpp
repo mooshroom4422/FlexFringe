@@ -43,7 +43,7 @@ int32_t main(int argc, char* argv[]) {
 		std::map<int, std::pair<int, double>> mp;
 		for(int i=0; i<n; ++i) {
 			auto [label, prob] = predictions[i][j];
-			if(prob <= 0.5)
+			if(prob <= 0.5 && false)
 				continue;
 			double prev = mp[label].second;
 			mp[label] = {mp[label].first+1, (prev==0.0?1.0:prev)*prob};

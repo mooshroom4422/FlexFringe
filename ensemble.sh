@@ -9,7 +9,8 @@
 
 mkdir tmp || exit 1;
 
-./preproc "$1" "$3" tmp/ 2> /dev/null
+echo "./preproc "$1" "$3" tmp/ 2> /dev/null"
+./preproc "$1" "$3" tmp/ # 2> /dev/null
 
 for input in tmp/*.dat 
 do

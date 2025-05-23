@@ -19,6 +19,8 @@ do
 	./cmake-build-debug/flexfringe --ini "$2" "$1" --mode predict --aptafile $apta --predicttype true
 	mlr --fs ';' --icsvlite --ocsv cut -f ' predicted trace type',' predicted type probability' "$apta.result" | tail -n +2 > "$apta.res"
 
+	mlr --fs ';' --icsvlite --ocsv cut -f ' predicted trace type' "$apta.result" | tail -n +2 > "$apta.res.raw"
+
 	list=$list" $apta.res"
 	num=$((num+1))
 done
