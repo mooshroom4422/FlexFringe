@@ -82,9 +82,27 @@ int rand(int l, int r) {
 	return uniform_int_distribution<int>(l, r)(rng);
 }
 
-int32_t main(int argc, char* argv[]) {
+int n;
+vt<word> words;
+map<ll, vt<int>> hstoi;
+int split(int color, vt<int> &vis, double ratio) {
+	int ile = 0;
+	while(double(ile)/double(n) < ratio) {
+		int idx = rand(0, n-1);
+		ll h = hs(words[idx]);
+		if(vis[idx] != 0 || sz(hstoi[h]) > double(n)*double(ratio)/4.0)
+			continue;
+		for(auto i : hstoi[h]) {
+			vis[i] = color;
+			++ile;
+		}
+	}
+	return ile;
+}
 
-	if(argc != 5) {
+int32_t main(int argc, char* argv[]) {
+	
+	if(argc < 5) {
 		cerr << "usage: ./split [input_file] [output_file] [seed] [split_ratio]\n";
 		cerr << "where split is the size of the test data in range [0-1]\n";
 		return 1;
@@ -100,21 +118,23 @@ int32_t main(int argc, char* argv[]) {
 		return 1;
 	}
 
-	ofstream train(out_file_name+".train"), test(out_file_name+".test");
+	ofstream train(out_file_name+".train"), test(out_file_name+".test"), valid(out_file_name+".valid");
 	if(!train.good() || !test.good()) {
 		cerr << "error opening output file: " << out_file_name << '\n';
 		return 1;
 	}
 
-	double ratio = stod(argv[4]);
-	int n = 0;
+	double test_ratio = stod(argv[4]);
+	double valid_ratio = -1;
+	if(argc >= 6)
+		valid_ratio = stod(argv[5]);
+	n = 0;
 	int c = 0;
 	input >> n >> c;
 
 	cout << "[debug] " << n << ' ' << c << '\n';
 
-	vt<word> words(n);
-	map<ll, vt<int>> hstoi;
+	words.resize(n);
 	FOR(i, 0, n) {
 		word w;
 		input >> w.l >> w.n;
@@ -125,41 +145,41 @@ int32_t main(int argc, char* argv[]) {
 		hstoi[hs(words[i])].pb(i);
 	}
 
-	vt<bool> vis(n, false);
-	int ile = 0;
-	while(double(ile)/double(n) < ratio) {
-		int idx = rand(0, n-1);
-		if(vis[idx])
-			continue;
-		ll h = hs(words[idx]);
-		for(auto i : hstoi[h]) {
-			vis[i] = true;
-			++ile;
-		}
-	}
+	vt<int> vis(n, 0);
 
-	train << n-ile << ' ' << c << endl;
-	test << ile << ' ' << c << endl;
+	int test_cnt = split(1, vis, test_ratio);
+	int valid_cnt = split(2, vis, valid_ratio);
+
+	train << n-test_cnt-valid_cnt << ' ' << c << endl;
+	test << test_cnt << ' ' << c << endl;
+	valid << valid_cnt << ' ' << c << endl;
 	
-	int gte = 0, gtr = 0;
+	int gte = 0, gtr = 0, gval = 0;
 	FOR(i, 0, n) {
-		if(vis[i]) {
-			test << words[i].l << ' ' << words[i].n << ' ';
-			for(auto x : words[i].a)
-				test << x << ' ';
-			test << endl;
-			++gte;
-		}
-		else {
+		if(vis[i] == 0) {
 			train << words[i].l << ' ' << words[i].n << ' ';
 			for(auto x : words[i].a)
 				train << x << ' ';
 			train << endl;
 			++gtr;
 		}
+		else if(vis[i] == 1) {
+			test << words[i].l << ' ' << words[i].n << ' ';
+			for(auto x : words[i].a)
+				test << x << ' ';
+			test << endl;
+			++gte;
+		}
+		else if(vis[i] == 2) {
+			valid << words[i].l << ' ' << words[i].n << ' ';
+			for(auto x : words[i].a)
+				valid << x << ' ';
+			valid << endl;
+			++gval;
+		}
 	}
 
-	cout << "[debug] " << gte << ' ' << gtr << ' ' << double(gte)/double(gtr+gte) << '\n';
+	cout << "[debug] " << gte << ' ' << gtr << ' ' << gval << ' ' << double(gte)/double(gtr+gte) << ' ' << double(gte)/double(gtr+gte) << '\n';
 
 	return 0;
 }
