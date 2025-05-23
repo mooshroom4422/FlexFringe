@@ -70,10 +70,13 @@ ll hs(const word &w) {
 	ll res = 0;
 
 	res += ((w.l+1)*prime)%mod;
-	res += ((w.n+1)*prime)%mod;
+	res += ((w.n+1)*prime*prime)%mod;
 
-	for(auto &x : w.a)
-		res += ((x+1)*prime)%mod;
+	ll pw = prime*prime*prime;
+	for(auto &x : w.a) {
+		res += ((x+1)*pw)%mod;
+		pw = (pw*prime)%mod;
+	}
 
 	return res;
 }
@@ -140,13 +143,26 @@ int32_t main(int argc, char* argv[]) {
 		FOR(j, 0, w.n)
 			input >> w.a[j];
 		// words[i] = w;
-		// hstoi[hs(words[i])].pb(i);
 		ll h = hs(w);
+		// hstoi[h].pb(i);
 		if(hashes.find(h) != hashes.end())
 			continue;
 		hashes.insert(h);
 		words.pb(w);
 	}
+
+	/*
+	for(auto [k,v] : hstoi) {
+		cout << k << ":\n";
+		for(auto i : v) {
+			for(auto x : words[i].a)
+				cout << x << ' ';
+			cout << '\n';
+		}
+	}
+
+	return 1;
+	*/
 
 	cout << "[debug] reduced: " << n << " -> " << sz(words) << '\n';
 	n = sz(words);
