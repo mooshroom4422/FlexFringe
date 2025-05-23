@@ -89,13 +89,10 @@ int split(int color, vt<int> &vis, double ratio) {
 	int ile = 0;
 	while(double(ile)/double(n) < ratio) {
 		int idx = rand(0, n-1);
-		ll h = hs(words[idx]);
-		if(vis[idx] != 0 || sz(hstoi[h]) > double(n)*double(ratio)/4.0)
+		if(vis[idx] != 0)
 			continue;
-		for(auto i : hstoi[h]) {
-			vis[i] = color;
-			++ile;
-		}
+		++ile;
+		vis[idx] = color;
 	}
 	return ile;
 }
@@ -134,16 +131,25 @@ int32_t main(int argc, char* argv[]) {
 
 	cout << "[debug] " << n << ' ' << c << '\n';
 
-	words.resize(n);
+	// words.resize(n);
+	set<ll> hashes;
 	FOR(i, 0, n) {
 		word w;
 		input >> w.l >> w.n;
 		w.a.resize(w.n);
 		FOR(j, 0, w.n)
 			input >> w.a[j];
-		words[i] = w;
-		hstoi[hs(words[i])].pb(i);
+		// words[i] = w;
+		// hstoi[hs(words[i])].pb(i);
+		ll h = hs(w);
+		if(hashes.find(h) != hashes.end())
+			continue;
+		hashes.insert(h);
+		words.pb(w);
 	}
+
+	cout << "[debug] reduced: " << n << " -> " << sz(words) << '\n';
+	n = sz(words);
 
 	vt<int> vis(n, 0);
 
