@@ -1,5 +1,7 @@
 #!/bin/bash
 
+mkdir tmp
+echo "" > ./only_pref.txt
 dir="stamina_validation_split"
 for (( i=1; i<=100; i++ )) do 
 	echo "[debug] $i"
@@ -27,8 +29,13 @@ for (( i=1; i<=100; i++ )) do
 	echo "$ok / $total"
 	acc=$(echo "scale=4;$ok / $total" | bc)
 	echo $acc
+	echo $acc >> ./only_pref.txt
 	echo "$acc;$result" > ./tmp/res.txt
 
 	mv ./tmp/res.txt ./stamina_results/stamina"$i"_res/pref.txt
-	cat ./stamina_results/stamina"$i"_res/pref.txt >> ./stamina_results/stamina"$i"_res/res.txt
+	# cat ./stamina_results/stamina"$i"_res/pref.txt >> ./stamina_results/stamina"$i"_res/res.txt
+	mv ./tmp/input.tmp ./stamina_results/stamina"$i"_res
+	mv ./tmp/input.tmp.ff.final.json ./stamina_results/stamina"$i"_res
+	mv ./tmp/input.tmp.ff.final.json.res ./stamina_results/stamina"$i"_res
+	mv ./tmp/input.tmp.ff.final.json.res.raw ./stamina_results/stamina"$i"_res
 done

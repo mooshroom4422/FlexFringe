@@ -2,9 +2,11 @@
 
 # $1 -> input data
 # $2 -> ini file
+# $3 -> combine threshold
 
 [[ -f "$1" ]] || { echo "not a valid input file"; exit 1; }
 [[ -f "$2" ]] || { echo "not a valid ini file"; exit 1; }
+[[ -f "$2" ]] || { echo "add threshold"; exit 1; }
 
 list=""
 num=0
@@ -28,7 +30,7 @@ done
 echo $m
 echo $num
 echo $list
-./combine tmp/final.res $m $num $list
+./combine tmp/final.res $m $num $list "$3"
 
 cat "$1" | tail -n +2 | cut -d ' ' -f 1 > tmp/expected
 total=$(wc -l tmp/expected | cut -d ' ' -f 1)

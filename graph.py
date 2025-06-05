@@ -12,6 +12,7 @@ pref = []
 # suf = []
 
 better = 0
+sq_diff = 0
 
 for dirpath, dirnames, filenames in os.walk(dir):
     if 'res.txt' in filenames:
@@ -46,6 +47,7 @@ for dirpath, dirnames, filenames in os.walk(dir):
                 # results[name] += acc/100
                 if acc > norm_acc:
                     print("better:", name, acc, norm_acc)
+                    sq_diff += (acc-norm_acc)**2
                     # ile[name] += 1
 
 # print(results)
@@ -73,6 +75,9 @@ for dirpath, dirnames, filenames in os.walk(dir):
 # plt.tight_layout()
 # plt.show()
 
+print("times better:", better)
+print("squared difference:", sq_diff)
+
 indices = list(range(len(ens)))
 plt.plot(indices, ens, color='orange', marker='o', label='ensemble')
 plt.plot(indices, pref, color='red', marker='o', label='prefix')
@@ -81,5 +86,4 @@ plt.legend()
 plt.grid()
 plt.show()
 
-print(pref)
-print(better)
+# print(pref)

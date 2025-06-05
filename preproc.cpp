@@ -23,7 +23,7 @@ std::string conv(int id) {
 void cut_ps(bool reverse, int cut_pref, int cut_suf, int id) {
 	std::string out_name = out_file+"/model_"+conv(id)+".dat";
 	std::ofstream file(out_name);
-	std::cerr << "[debug] outps\n";
+	std::cerr << "[debug] out_ps\n";
 	std::cerr << "[debug] output file: " << out_name << std::endl;
 	if(!file.good()) {
 		std::cerr << "error openning the file" << std::endl;
@@ -45,7 +45,7 @@ void cut_ps(bool reverse, int cut_pref, int cut_suf, int id) {
 void reverse_after(bool reverse, int k, int id) {
 	std::string out_name = out_file+"/model_"+conv(id)+".dat";
 	std::ofstream file(out_name);
-	std::cerr << "[debug] outps\n";
+	std::cerr << "[debug] out_ra\n";
 	std::cerr << "[debug] output file: " << out_name << std::endl;
 	if(!file.good()) {
 		std::cerr << "error openning the file" << std::endl;
@@ -64,6 +64,48 @@ void reverse_after(bool reverse, int k, int id) {
 		for(int i=sz(tr.labels)-1; i>=k; --i)
 			file << tr.labels[i] << ' ';
 		file << std::endl;
+	}
+}
+
+void reverse_substring(int l, int r, int id) {
+	std::string out_name = out_file+"/model_"+conv(id)+".dat";
+	std::ofstream file(out_name);
+	std::cerr << "[debug] out_rss\n";
+	std::cerr << "[debug] output file: " << out_name << std::endl;
+	if(!file.good()) {
+		std::cerr << "error openning the file" << std::endl;
+		exit(1);
+	}
+
+	file << n << ' ' << m << std::endl;
+
+
+	for(auto tr : traces) {
+		std::cerr << "[debug] original sequence:\n";
+		std::cerr << tr.l << ' ' << tr.n << ": ";
+		for(auto x : tr.labels)
+			std::cerr << x << ' ';
+		std::cerr << '\n';
+
+		std::cerr << "[debug] modified sequence, l=" << l << ", r=" << r << ":\n";
+		std::cerr << tr.l << ' ' << tr.n << ": ";
+
+		file << tr.l << ' ' << tr.n << ' ';
+		for(int i=0; i<std::min(sz(tr.labels), l); ++i) {
+			file << tr.labels[i] << ' ';
+			std::cerr << tr.labels[i] << ' ';
+		}
+		for(int i=std::min(r, sz(tr.labels)-1); i>=l; --i) {
+			file << tr.labels[i] << ' ';
+			std::cerr << tr.labels[i] << ' ';
+		}
+		for(int i=r+1; i<sz(tr.labels); ++i) {
+			file << tr.labels[i] << ' ';
+			std::cerr << tr.labels[i] << ' ';
+		}
+		file << std::endl;
+
+		std::cerr << '\n';
 	}
 }
 
@@ -121,6 +163,13 @@ int32_t main(int argc, char* argv[]) {
 			bool rev = ((reverse == "true") ? true : false);
 			std::cout << "[ra] reading: " << reverse << ' ' << k << "... ";
 			reverse_after(rev, std::stoi(k), i);
+			std::cout << "done\n";
+		}
+		else if(mode == "rss") {
+			std::string l, r;
+			config >> l >> r;
+			std::cout << "[rss] reading: " << l << ' ' << r << "... ";
+			reverse_substring(std::stoi(l), std::stoi(r), i);
 			std::cout << "done\n";
 		}
 	}

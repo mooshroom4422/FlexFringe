@@ -6,7 +6,7 @@
 
 int32_t main(int argc, char* argv[]) {
 	if(argc < 4) {
-		std::cerr << "usage: ./combine [out_file] [m] [n] [list of args of size n]" << std::endl;
+		std::cerr << "usage: ./combine [out_file] [m] [n] [list of args of size n] [optional: accepting th.]" << std::endl;
 		return 1;
 	}
 
@@ -17,6 +17,10 @@ int32_t main(int argc, char* argv[]) {
 		std::cerr << "error opening out_file" << std::endl;
 		return 1;
 	}
+
+	int threshold = (n+1)/2;
+	if(argc >= n+4)
+		threshold = std::stoi(argv[n+4]);
 
 	std::vector<std::vector<std::pair<int, double>>> predictions(m);
 
@@ -40,36 +44,15 @@ int32_t main(int argc, char* argv[]) {
 	}
 	
 	for(int j=0; j<m; ++j) {
-		std::map<int, std::pair<int, double>> mp;
+		int ok = 0;
 		for(int i=0; i<n; ++i) {
 			auto [label, prob] = predictions[i][j];
-			if(prob <= 0.5 && false)
-				continue;
-			double prev = mp[label].second;
-			mp[label] = {mp[label].first+1, (prev==0.0?1.0:prev)*prob};
+			if(label == 1)
+				++ok;
 		}
-
-		typedef std::tuple<int, int, double> state;
-
-		std::vector<state> to_sort;
-		for(auto [k, v] : mp) {
-			auto [c, p] = v;
-			to_sort.push_back({k, c, p});
-		}
-
-		std::sort(to_sort.begin(), to_sort.end(), 
-			[](const state &l, const state &r){
-				if(std::get<1>(l) == std::get<1>(r))
-					return std::get<2>(l) > std::get<2>(r);
-				return std::get<1>(l) > std::get<1>(r);
-			}
-		);
-		
-		if(to_sort.empty()) {
-			out << -1 << ";" << 0 << std::endl;
-			continue;
-		}
-		out << std::get<0>(to_sort[0]) << ";" << std::get<2>(to_sort[0])  << std::endl;
+		int pred = (ok>=threshold?1:0);
+		double rt = double(ok)/double(n);
+		out << pred << ";" << 1-pred-rt << std::endl;
 	}
 
 	return 0;
