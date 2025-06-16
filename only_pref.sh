@@ -1,9 +1,11 @@
 #!/bin/bash
 
-mkdir tmp
+mkdir stamina_results || { echo "failed to create directory stamina_results"; exit 1; }
+rm -rf tmp
 echo "" > ./only_pref.txt
-dir="stamina_validation_split"
+dir="stamina_validation_split_new"
 for (( i=1; i<=100; i++ )) do 
+	mkdir tmp
 	echo "[debug] $i"
 	train=$i"_training.txt.dat.train"
 	tst=$i"_training.txt.dat.test"
@@ -24,18 +26,24 @@ for (( i=1; i<=100; i++ )) do
 	result=tmp/input.tmp.ff.final.json.res
 	echo "[debug] $result"
 	# cut -d ';' -f 1 "$result" | tr -d ' ' > "$result.asdasd"
-	wrong=$(cut -d ';' -f 1 "$result" | tr -d ' ' | diff -b - tmp/expected | grep -c "<")
-	ok=$((total-wrong))
-	echo "$ok / $total"
-	acc=$(echo "scale=4;$ok / $total" | bc)
+	# WRONG! diff doesnt work this way!!
+	# wrong=$(cut -d ';' -f 1 "$result" | tr -d ' ' | diff -b - tmp/expected | grep -c "<")
+	# ok=$((total-wrong))
+	# echo "$ok / $total"
+	# acc=$(echo "scale=4;$ok / $total" | bc)
+	acc=$(python3 acc.py "$result" tmp/expected)
 	echo $acc
 	echo $acc >> ./only_pref.txt
 	echo "$acc;$result" > ./tmp/res.txt
 
-	mv ./tmp/res.txt ./stamina_results/stamina"$i"_res/pref.txt
+	python3 extended.py "$result" tmp/expected tmp/extended.txt
+	
+	mv tmp ./stamina_results/stamina"$i"_res
+	# mv ./tmp/res.txt ./stamina_results/stamina"$i"_res/pref.txt
 	# cat ./stamina_results/stamina"$i"_res/pref.txt >> ./stamina_results/stamina"$i"_res/res.txt
-	mv ./tmp/input.tmp ./stamina_results/stamina"$i"_res
-	mv ./tmp/input.tmp.ff.final.json ./stamina_results/stamina"$i"_res
-	mv ./tmp/input.tmp.ff.final.json.res ./stamina_results/stamina"$i"_res
-	mv ./tmp/input.tmp.ff.final.json.res.raw ./stamina_results/stamina"$i"_res
+	# mv ./tmp/input.tmp ./stamina_results/stamina"$i"_res
+	# mv ./tmp/input.tmp.ff.final.json ./stamina_results/stamina"$i"_res
+	# mv ./tmp/input.tmp.ff.final.json.res ./stamina_results/stamina"$i"_res
+	# mv ./tmp/input.tmp.ff.final.json.res.raw ./stamina_results/stamina"$i"_res
+	# mv ./tmp/extended.txt ./stamina_results/stamina"$i"_res
 done

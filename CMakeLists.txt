@@ -41,7 +41,9 @@ include_directories("${PROJECT_SOURCE_DIR}"
 
 add_subdirectory(source)
 
-add_executable(flexfringe source/main.cpp)
+add_executable(flexfringe source/main.cpp
+        source/random_walk.cpp
+        source/random_walk.h)
 
 
 # Need this so the plugin registration does not get stripped out

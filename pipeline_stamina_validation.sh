@@ -1,58 +1,94 @@
 #!/bin/bash
 
+> log.txt
 echo "starting pipeline" >> log.txt
 start=$(date +%s)
 
+python3 sk.py || exit 1; # make sure that sklearn is installed
+
 mkdir stamina_results || { echo "failed to create directory stamina_results"; exit 1; }
-dir="stamina_validation_split"
+dir="stamina_validation_split_new"
 
 for (( i=1; i<=100; i++ ))
 do 
+    while (( $(jobs -r | wc -l) >= 80 )); do # for some reason it has to be *4, if there is an inner loop, without it, it works
+        sleep 1
+    done
+	(
 	train=$i"_training.txt.dat.train"
 	tst=$i"_training.txt.dat.test"
 	validation=$i"_training.txt.dat.valid"
+
 	echo "train $train" | tee -a log.txt
 
-	./gen_sub "data/$dir/$train" tmp.conf 999999 || exit 1;
+	rm -rf "tmp$i"
+	mkdir "tmp$i"
 
-	# random shuffle and pick only 100
-	model_num=100
-	echo "$model_num" > now.conf
-	tail -n +2 tmp.conf | shuf | head -n "$model_num" >> now.conf
+	./gen_sub "data/$dir/$train" "tmp$i".conf rss 600 || exit 1;
+
+	# random shuffle and pick only 300 -> moved to gen_sub
+	# model_num=300
+	# echo "$model_num" > now.conf
+	# tail -n +2 "tmp$i".conf | shuf | head -n "$model_num" >> now.conf
 
 	# cp config.conf now.conf
-	./ensemble.sh "data/$dir/$train" ini/edsm.ini now.conf >> log.txt || exit 1;
+	./ensemble.sh "data/$dir/$train" ini/edsm.ini "tmp$i".conf $i >> log.txt || exit 1;
 	
-	cp now.conf tmp/config.conf
+	cp "tmp$i".conf "tmp$i"/config.conf
 
 	echo "pick $validation" | tee -a log.txt
-	./predict.sh "data/$dir/$validation" ini/edsm.ini 2 >> log.txt || exit 1;
-	./pick.sh 9 || exit 1;
+	./predict.sh "data/$dir/$validation" ini/edsm.ini 0.0 $i >> log.txt || exit 1;
+	
+	tail -n +2 ./"tmp$i"/res.txt | sort -nrt';' -k1 > ./pre_pick_sort"$i".txt
+	rm ./"tmp$i"/res.txt
 
-	# rm ./tmp/res.txt
-	rm -r tmp
+	# for (( ens_size=20; ens_size<=100; ens_size+=2 ))
+	# do
+	
+	# ens_size=80
+	echo "starting ensemble $ens_size"
 
-	./merge "data/$dir/$train" "data/$dir/$validation" ./merged_input.dat
+	# ./pick.sh 76 "$i" || exit 1;
+	./pick_random_sim.sh 80 "$i" 1000 2 0.9 || exit 1;
 
-	./ensemble.sh ./merged_input.dat ini/edsm.ini _ensemble_config.conf >> log.txt || exit 1;
+	rm ./"tmp$i"/*.dat*
+
+	./merge "data/$dir/$train" "data/$dir/$validation" ./"tmp$i"/merged_input.d
+
+	./ensemble.sh ./"tmp$i"/merged_input.d ini/edsm.ini ./"tmp$i"/ensemble_config.conf $i >> log.txt || exit 1;
 
 	echo "test $tst" | tee -a log.txt
-	./predict.sh "data/$dir/$tst" ini/edsm.ini 2 >> log.txt || exit 1;
+	for (( ens_size=1; ens_size<100; ens_size+=1 ))
+	do
+		actual=$(echo "scale=2; $ens_size/100" | bc)
+	./predict.sh "data/$dir/$tst" ini/edsm.ini "$actual" $i >> log.txt || exit 1;
 
-	cp ./pre_pick.txt ./tmp
-	cp ./pre_pick_sort.txt ./tmp
+		mkdir ./"tmp$i"/"ens$ens_size"
+		mv ./"tmp$i"/res.txt ./"tmp$i"/"ens$ens_size"
+		mv ./"tmp$i"/extended.txt ./"tmp$i"/"ens$ens_size"
+		cp ./"tmp$i"/ensemble_config.conf ./"tmp$i"/"ens$ens_size"
+	done 
 
-	mv _ensemble_config.conf tmp
-	mv tmp stamina_results/stamina"$i"_res
+	# cp ./pre_pick.txt ./"tmp$i"
+	mv ./pre_pick_sort"$i".txt ./"tmp$i"
+	mv ./uncut"$i".txt ./"tmp$i"
 
-	echo "finished!" | tee -a log.txt
+	# mv _ensemble_config.conf "tmp$i"
+	mv "tmp$i" stamina_results/stamina"$i"_res
+	rm "tmp$i".conf
+
+	echo "finished! $i" # | tee -a log.txt
+	) &
 done
 
+wait
+
 # cp config.conf stamina_results
-mv log.txt stamina_results
-cp ./pipeline_stamina_validation.sh stamina_results
 
 notify-send "finished"
 end=$(date +%s)
 runtime=$((end-start))
 echo "took: $runtime seconds" | tee -a log.txt
+
+mv log.txt stamina_results
+cp ./pipeline_stamina_validation.sh stamina_results

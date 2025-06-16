@@ -79,6 +79,47 @@ void reverse_substring(int l, int r, int id) {
 
 	file << n << ' ' << m << std::endl;
 
+	for(auto tr : traces) {
+		// std::cerr << "[debug] original sequence:\n";
+		// std::cerr << tr.l << ' ' << tr.n << ": ";
+		// for(auto x : tr.labels)
+		// 	std::cerr << x << ' ';
+		// std::cerr << '\n';
+
+		// std::cerr << "[debug] modified sequence, l=" << l << ", r=" << r << ":\n";
+		// std::cerr << tr.l << ' ' << tr.n << ": ";
+
+		file << tr.l << ' ' << tr.n << ' ';
+		for(int i=0; i<std::min(sz(tr.labels), l); ++i) {
+			file << tr.labels[i] << ' ';
+			// std::cerr << tr.labels[i] << ' ';
+		}
+		for(int i=std::min(r, sz(tr.labels)-1); i>=l; --i) {
+			file << tr.labels[i] << ' ';
+			// std::cerr << tr.labels[i] << ' ';
+		}
+		for(int i=r+1; i<sz(tr.labels); ++i) {
+			file << tr.labels[i] << ' ';
+			// std::cerr << tr.labels[i] << ' ';
+		}
+		file << std::endl;
+
+		// std::cerr << '\n';
+	}
+}
+
+void move_substring(int l, int r, int id) {
+	std::string out_name = out_file+"/model_"+conv(id)+".dat";
+	std::ofstream file(out_name);
+	std::cerr << "[debug] out_mss\n";
+	std::cerr << "[debug] output file: " << out_name << std::endl;
+	if(!file.good()) {
+		std::cerr << "error openning the outfile" << std::endl;
+		exit(1);
+	}
+
+	file << n << ' ' << m << std::endl;
+
 
 	for(auto tr : traces) {
 		std::cerr << "[debug] original sequence:\n";
@@ -91,11 +132,12 @@ void reverse_substring(int l, int r, int id) {
 		std::cerr << tr.l << ' ' << tr.n << ": ";
 
 		file << tr.l << ' ' << tr.n << ' ';
-		for(int i=0; i<std::min(sz(tr.labels), l); ++i) {
+
+		for(int i=l; i<=std::min(r, sz(tr.labels)-1); ++i) {
 			file << tr.labels[i] << ' ';
 			std::cerr << tr.labels[i] << ' ';
 		}
-		for(int i=std::min(r, sz(tr.labels)-1); i>=l; --i) {
+		for(int i=0; i<std::min(sz(tr.labels), l); ++i) {
 			file << tr.labels[i] << ' ';
 			std::cerr << tr.labels[i] << ' ';
 		}
@@ -123,7 +165,7 @@ int32_t main(int argc, char* argv[]) {
 	out_file = argv[3];
 
 	if(!file.good() || !config.good()) {
-		std::cerr << "error openning the file" << std::endl;
+		std::cerr << "error openning the config file" << std::endl;
 		file.close();
 		config.close();
 		return 1;
@@ -170,6 +212,13 @@ int32_t main(int argc, char* argv[]) {
 			config >> l >> r;
 			std::cout << "[rss] reading: " << l << ' ' << r << "... ";
 			reverse_substring(std::stoi(l), std::stoi(r), i);
+			std::cout << "done\n";
+		}
+		else if(mode == "mss") {
+			std::string l, r;
+			config >> l >> r;
+			std::cout << "[mss] reading: " << l << ' ' << r << "... ";
+			move_substring(std::stoi(l), std::stoi(r), i);
 			std::cout << "done\n";
 		}
 	}

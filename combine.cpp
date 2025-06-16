@@ -18,11 +18,12 @@ int32_t main(int argc, char* argv[]) {
 		return 1;
 	}
 
-	int threshold = (n+1)/2;
-	if(argc >= n+4)
-		threshold = std::stoi(argv[n+4]);
+	double threshold = 0.5;
+	if(argc > n+4)
+		threshold = std::stod(argv[n+4]);
+	std::cerr << "threshold: " << threshold << '\n';
 
-	std::vector<std::vector<std::pair<int, double>>> predictions(m);
+	std::vector<std::vector<std::pair<int, double>>> predictions(n);
 
 	for(int i=0; i<n; ++i) {
 		std::ifstream now(argv[i+4]);
@@ -50,8 +51,8 @@ int32_t main(int argc, char* argv[]) {
 			if(label == 1)
 				++ok;
 		}
-		int pred = (ok>=threshold?1:0);
 		double rt = double(ok)/double(n);
+		int pred = (rt>threshold?1:0);
 		out << pred << ";" << 1-pred-rt << std::endl;
 	}
 
