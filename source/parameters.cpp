@@ -127,3 +127,8 @@ int DFA_SIZE_BOUND = -1;
 int APTA_SIZE_BOUND = -1;
 bool SAT_RUN_GREEDY = false;
 
+// random walks
+int NUM_WALKS = 10;
+double WALK_FACTOR = 2.0;
+int WALK_SEED = -1;
+

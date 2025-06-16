@@ -143,4 +143,9 @@ extern int DFA_SIZE_BOUND;
 extern int APTA_SIZE_BOUND;
 extern bool SAT_RUN_GREEDY;
 
+// random walks
+extern int NUM_WALKS;
+extern double WALK_FACTOR;
+extern int WALK_SEED;
+
 #endif

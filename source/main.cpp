@@ -21,6 +21,7 @@
 
 #include "parameters.h"
 #include "csv.hpp"
+#include "random_walk.h"
 #include "input/inputdata.h"
 #include "input/inputdatalocator.h"
 #include "input/parsers/csvparser.h"
@@ -244,6 +245,26 @@ void run() {
         } else {
             std::cerr << "require a json formatted apta file to make predictions" << std::endl;
         }
+    } else if(OPERATION_MODE == "randomwalk") {
+        std::cout << "random walk mode selected" << std::endl;
+        LOG_S(INFO) << "random walk mode selected, starting run";
+
+        if(!APTA_FILE.empty()){
+
+            // First, we read the apta file into the global inputdata, so we can obtain the alphabet mapping
+            std::ifstream input_apta_stream(APTA_FILE);
+            std::cerr << "reading apta file - " << APTA_FILE << std::endl;
+            the_apta->read_json(input_apta_stream);
+
+            // Setup output file stream
+            std::ostringstream res_stream;
+            res_stream << APTA_FILE << ".walk";
+            std::ofstream output(res_stream.str().c_str());
+
+            perform_random_walk(merger, output);
+        } else {
+            std::cerr << "require a json formatted apta file to generate random walks" << std::endl;
+        }
     } else if(OPERATION_MODE == "diff") {
         std::cout << "behavioral differencing mode selected" << std::endl;
         LOG_S(INFO) << "Diff mode selected, starting run";
@@ -418,6 +439,11 @@ int main(int argc, char *argv[]){
     app.add_option("--distancemetric", DISTANCE_METRIC_SKETCHES, "The distance metric when comparing the sketches. 1 hoeffding-bound and cosine-similarity for score, 2 hoeffding bound in both, 3 like 1 but pooled. Default: 1");
     app.add_option("--randominitialization", RANDOM_INITIALIZATION_SKETCHES, "If 0 (zero), then initialize CMS deterministically. Elsewise, CMS becomes random. Default: 0.");
     app.add_option("--futuresteps", NSTEPS_SKETCHES, "Number of steps into future when storing future in sketches. Default: 2.");
+
+    // parameters for random walks
+    app.add_option("--numwalks", NUM_WALKS, "Number of random walks generated from the given apta. Default: 10.");
+    app.add_option("--walkfactor", WALK_FACTOR, "The walk is ended with prob. (1/(out_deg(v)*k)). Default: 2.");
+    app.add_option("--walkseed", WALK_SEED, "Seed used for random walk. Default using C++ random device.");
 
     CLI11_PARSE(app, argc, argv)
 
