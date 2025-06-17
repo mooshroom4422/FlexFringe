@@ -58,16 +58,16 @@ do
 	./ensemble.sh ./"tmp$i"/merged_input.d ini/edsm.ini ./"tmp$i"/ensemble_config.conf $i >> log.txt || exit 1;
 
 	echo "test $tst" | tee -a log.txt
-	for (( ens_size=1; ens_size<100; ens_size+=1 ))
-	do
-		actual=$(echo "scale=2; $ens_size/100" | bc)
-	./predict.sh "data/$dir/$tst" ini/edsm.ini "$actual" $i >> log.txt || exit 1;
+	# for (( ens_size=1; ens_size<100; ens_size+=1 ))
+	# do
+		# actual=$(echo "scale=2; $ens_size/100" | bc)
+	./predict.sh "data/$dir/$tst" ini/edsm.ini 0.48 $i >> log.txt || exit 1;
 
-		mkdir ./"tmp$i"/"ens$ens_size"
-		mv ./"tmp$i"/res.txt ./"tmp$i"/"ens$ens_size"
-		mv ./"tmp$i"/extended.txt ./"tmp$i"/"ens$ens_size"
-		cp ./"tmp$i"/ensemble_config.conf ./"tmp$i"/"ens$ens_size"
-	done 
+		# mkdir ./"tmp$i"/"ens$ens_size"
+		# mv ./"tmp$i"/res.txt ./"tmp$i"/"ens$ens_size"
+		# mv ./"tmp$i"/extended.txt ./"tmp$i"/"ens$ens_size"
+		# cp ./"tmp$i"/ensemble_config.conf ./"tmp$i"/"ens$ens_size"
+	# done 
 
 	# cp ./pre_pick.txt ./"tmp$i"
 	mv ./pre_pick_sort"$i".txt ./"tmp$i"
