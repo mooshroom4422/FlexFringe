@@ -10,7 +10,7 @@ echo "picking n=$1, randomwalk"
 mkdir "asd$2"
 for apta in "tmp$2"/*.final.json
 do
-	./build/flexfringe --ini ini/edsm.ini ./data/staminadata/1_training.txt.dat --mode randomwalk --aptafile "$apta"  --numwalks "$3" --walkfactor "$4"
+	./build/flexfringe --ini ini/edsm.ini ./data/staminadata/1_training.txt.dat --mode randomwalk --aptafile "$apta"  --numwalks "$3" --walkfactor "$4" --walkseed 1234
 
 	config_line=$(echo "$apta" | grep -oP 'model_\K[0-9]+')
 	config_line=$((config_line))

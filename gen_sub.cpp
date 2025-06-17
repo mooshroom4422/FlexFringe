@@ -7,8 +7,9 @@
 #define sz(x) (int)(x).size()
 
 int32_t main(int argc, char* argv[]) {
-	if(argc != 5) {
-		std::cerr << "usage: ./gen_sub [input_path] [out_path] [mode] [limit]" << std::endl;
+	if(argc != 6) {
+		std::cerr << "usage: ./gen_sub [input_path] [out_path] [mode] [limit] [seed]" << std::endl;
+		std::cerr << "to used random_device, provide seed=0" << std::endl;
 		return 1;
 	}
 
@@ -20,6 +21,7 @@ int32_t main(int argc, char* argv[]) {
 
 	std::string mode = argv[3];
 	int limit = std::stoi(argv[4]);
+	int seed = std::stoi(argv[5]);
 
 	if(!file.good() || !out.good()) {
 		std::cerr << "error openning the file" << std::endl;
@@ -63,6 +65,8 @@ int32_t main(int argc, char* argv[]) {
 
 	std::random_device rd;
 	std::mt19937 rng(rd());
+	if(seed != 0)
+		rng = std::mt19937(seed);
 	std::shuffle(res.begin(), res.end(), rng);
 
 	if(mode == "rss") {

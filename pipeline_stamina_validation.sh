@@ -11,7 +11,7 @@ dir="stamina_validation_split_new"
 
 for (( i=1; i<=100; i++ ))
 do 
-    while (( $(jobs -r | wc -l) >= 80 )); do # for some reason it has to be *4, if there is an inner loop, without it, it works
+    while (( $(jobs -r | wc -l) >= 20 )); do # for some reason it has to be *4, if there is an inner loop, without it, it works
         sleep 1
     done
 	(
@@ -24,7 +24,7 @@ do
 	rm -rf "tmp$i"
 	mkdir "tmp$i"
 
-	./gen_sub "data/$dir/$train" "tmp$i".conf rss 600 || exit 1;
+	./gen_sub "data/$dir/$train" "tmp$i".conf rss 600 1234 || exit 1;
 
 	# random shuffle and pick only 300 -> moved to gen_sub
 	# model_num=300
@@ -48,8 +48,8 @@ do
 	# ens_size=80
 	echo "starting ensemble $ens_size"
 
-	# ./pick.sh 76 "$i" || exit 1;
-	./pick_random_sim.sh 80 "$i" 1000 2 0.9 || exit 1;
+	./pick.sh 76 "$i" || exit 1;
+	# ./pick_random_sim.sh 80 "$i" 1000 2 0.9 || exit 1;
 
 	rm ./"tmp$i"/*.dat*
 
